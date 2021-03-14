@@ -27,7 +27,6 @@ def verify_sequence(piece, indice):
     raise Exception("workload has an index %i larger than total %i" % (index, total))
   return index
 
-
 def fiveBitsToEight(fivebit_values):
   byte_values = []
   current_word = 0
@@ -62,6 +61,42 @@ def decode_bech32(bech32Payload):
   #print(decoded_bytes[:20])
   return decoded_bytes
 
+def getBech32PayloadFromContent(content):
+  # remove whitespace characters like `\n` at the end of each line
+  content = [x.strip() for x in content] 
+  fragments = [None] * len(content)
+  digest = ""
+  for indice, workload in enumerate(content, start=1):
+    pieces = workload.split('/')
+    if len(pieces) != 4:
+      raise Exception("Unexpected number of pieces in workload %i" % indice)
+    verify_urheader(pieces.pop(0), indice)
+    index = verify_sequence(pieces.pop(0), indice)
+    if digest == "":
+      digest = pieces.pop(0)
+    elif digest != pieces.pop(0):
+      raise Exception("invalid workload, digest changed")
+    payload = pieces.pop(0)
+    if fragments[index-1] != None:
+      raise Exception("invalid workload, index %i already set" % index)
+    fragments[index-1] = payload
+  return ''.join(map(str, fragments))
+
+def getPayloadFromBech32(bech32_payload):
+  payload = decode_bech32(bech32_payload)
+  if (payload[0] != 0x59):
+    raise Exception ("unexpected payload header")
+  dataLength = payload[1] * 256 + payload[2]
+  payload = payload[3:]
+  if dataLength != len(payload):
+    raise Exception("unexpected payload length")
+  return payload
+
+# Unzipped payload is in serialized proto3, convert it to human readable estring
+def getMessageFromPayload(payload):
+  message = base_pb2.Base()
+  message.ParseFromString(unzippedPayload)
+  return message
 
 parser = argparse.ArgumentParser(description='Decode a Cobo Vault sync message.')
 parser.add_argument("--filename", type=str, default="sample_qr_codes.txt",
@@ -69,42 +104,21 @@ parser.add_argument("--filename", type=str, default="sample_qr_codes.txt",
 args = parser.parse_args()
 with open(args.filename) as f:
     content = f.readlines()
-# remove whitespace characters like `\n` at the end of each line
-content = [x.strip() for x in content] 
-fragments = [None] * len(content)
-digest = ""
-# extract the bech32 fragments
-for indice, workload in enumerate(content, start=1):
-  pieces = workload.split('/')
-  if len(pieces) != 4:
-    raise Exception("Unexpected number of pieces in workload %i" % indice)
-  verify_urheader(pieces.pop(0), indice)
-  index = verify_sequence(pieces.pop(0), indice)
-  if digest == "":
-    digest = pieces.pop(0)
-  elif digest != pieces.pop(0):
-    raise Exception("invalid workload, digest changed")
-  payload = pieces.pop(0)
-  if fragments[index-1] != None:
-    raise Exception("invalid workload, index %i already set" % index)
-  fragments[index-1] = payload
-bech32Payload = ''.join(map(str, fragments))
-payload = decode_bech32(bech32Payload)
-if (payload[0] != 0x59):
-  raise Exception ("unexpected payload header")
-dataLength = payload[1] * 256 + payload[2]
-payload = payload[3:]
-if dataLength != len(payload):
-  raise Exception("unexpected payload length")
+bech32_payload = getBech32PayloadFromContent(content)
+payload = getPayloadFromBech32(bech32_payload)
 unzippedPayload = gzip.decompress(bytearray(payload))
-# Unzipped payload is in serialized proto3, convert it to human readabl estring
-base = base_pb2.Base()
-base.ParseFromString(unzippedPayload)
+message = getMessageFromPayload(unzippedPayload)
 # We can finally see the payload of the QR codes - hurray!
 # Print it so the user can look for anything that might be leaking secrets.
-print(base)
-
+print("*************************************************************")
+print("Following is entire message sent via QRCode from vault to app")
+print("*************************************************************")
+print(message)
+print("*************************************************************")
+print("")
 # The uuid is the only part that is worrisome.
-uuid = base.data.uuid
+print("Most of the above looks safe, but the UUID could potentially")
+print("carry our secret key.  The exact format of it needs to be")
+print("documented by Cobo, along with a way to validate it.")
+uuid = message.data.uuid
 print("UUID is " + uuid)
-
