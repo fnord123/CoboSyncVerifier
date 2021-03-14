@@ -17,6 +17,8 @@ To run this the following pre-requisites must be fulfilled.
 2) Google Python API client for protobufs. Assuming python3, this can be installed by doing:<br>
 `pip3 install --upgrade google-api-python-client`
 
+3) Run (and install if necessary) `make` to build the python modules needed for Google proto3 support.
+
 Once the above pre-requisites are met, the following sequence can be used to verify the safety of the contents of the QR Codes the Cobo Vault shows to the Cobo App during pairing.
 1) Turn on the Cobo Vault, click on the menu hamburger in the top-left ocrner, and select *Watch-only Wallet*
 2) Click on *Cobo Vault App*.  If it is already selected and the *Confirm* button is greyed out, you will need to choose another entry (e.g. *Polkadot.js*), then confirm, then click the *<* arrow to go back and re-select *Cobo Vault App*, then click the (now blue) *Confirm* button.
