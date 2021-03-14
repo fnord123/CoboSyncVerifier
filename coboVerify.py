@@ -7,6 +7,9 @@
 import argparse
 import base64
 import gzip
+import sys
+sys.path.insert(0, './py_protocol')
+import base_pb2
 
 def verify_urheader(urHeader, indice):
   if urHeader != "UR:BYTES":
@@ -70,6 +73,7 @@ with open(args.filename) as f:
 content = [x.strip() for x in content] 
 fragments = [None] * len(content)
 digest = ""
+# extract the bech32 fragments
 for indice, workload in enumerate(content, start=1):
   pieces = workload.split('/')
   if len(pieces) != 4:
@@ -87,13 +91,20 @@ for indice, workload in enumerate(content, start=1):
 bech32Payload = ''.join(map(str, fragments))
 payload = decode_bech32(bech32Payload)
 if (payload[0] != 0x59):
-  raise Exception ("unexpected header")
+  raise Exception ("unexpected payload header")
 dataLength = payload[1] * 256 + payload[2]
 payload = payload[3:]
 if dataLength != len(payload):
-  raise Exception("unexpected length")
+  raise Exception("unexpected payload length")
 unzippedPayload = gzip.decompress(bytearray(payload))
-#listOfLines = unzippedPayload.split(b'\n')
-print(unzippedPayload.hex())
-undecodedPayload = base64.b64decode(unzippedPayload.hex())
-print(undecodedPayload)
+# Unzipped payload is in serialized proto3, convert it to human readabl estring
+base = base_pb2.Base()
+base.ParseFromString(unzippedPayload)
+# We can finally see the payload of the QR codes - hurray!
+# Print it so the user can look for anything that might be leaking secrets.
+print(base)
+
+# The uuid is the only part that is worrisome.
+uuid = base.data.uuid
+print("UUID is " + uuid)
+
