@@ -69,15 +69,13 @@ README.md for how to do that.
 UUID is 641d6af6cb503f33ab63829cc77b39dbb0618b963ca9b984ad427e65de9c6267
 ```
 
-As one can see, most of the payload is understandable and does not appear to contain any secrets.  However, to be maximally secure, the user should go through each of the xPub entries listed above and independently derive them. 
+As one can see, most of the payload is understandable and does not appear to contain any secrets.  However, one thing that looks odd is the UUID field, which isn't formatted like a [correct UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier#Format), which is at best confusing and at most worrisome, as it has enough bytes to encode a private key.  Fortunately Cobo provides source code to their device, so it is possible to independently verify that this 'UUID' (which is actually more like a wallet ID) isn't doing anything nefarious.
 
-**TODO:** Add instructions how to do that.
+The 'UUID' is actually a slightly modified (truncated) BIP32 Extended Public Key.  The [CoboUUID.py](CoboUUID.py) file in this repository shows the steps Cobo uses to generate the UUID, and the instructions below explain how a user can securely verify its contents are what the source code asserts it to be.
 
-The UUID stands for the the unique identifier.  Cobo derives this value from the BIP32 Extended Public Key derived from the user's mnemonic.  The [CoboUUID.py](CoboUUID.py) file in this repository shows the steps Cobo uses to generate the UUID.
-
-At this point, the user has a few choices:
-- Accept the code as is. Trust that Cobo is on the up and up, and that I (the author of this website), who did the following steps, are honest actors.  In doing so you already are a step ahead of the typical Trezor or Ledger user because you have at least looked at how the device communicates to the outside world.  Unless you have an (expensive) USB scanner and/or Bluetooth scanner you can't do the same with those other devices.
-- Verify all the xPubs shown are truly derived xPubs from the BIP32 Extended Public Key.  This is useful to do because it ensures they truly are derived xPUBs and not a backdoor way of leaking private keys.  Instructions coming later for how to do this.
+At this point, the user has a few choices, depending on how confident they want to be in the security of their Cobo Vault:
+- Accept the code as is. Trust that Cobo is on the up and up, or at least that I (the author of this website), who did the following steps, am an honest actors.  In doing so you already are a step ahead of the typical Trezor or Ledger user because you have at least looked at how the device communicates to the outside world.  Unless you have an (expensive) USB scanner and/or Bluetooth scanner you can't do the same with those other devices.
+- Verify all the xPubs shown are actually derived xPubs from the BIP32 Extended Public Key.  This is useful to do because it ensures they truly are derived xPUBs and not a backdoor way of leaking private keys.  Instructions coming later for how to do this.
 - Verify that the 'UUID' shown by your device was generated using the same algorithm that [CoboUUID.py](CoboUUID.py) shows.  Note that this algorithm makes use of secret information, so it should only be done on a secure compute environment.  Specifically, a laptop with no HD or SSD, running TAILS OS booted off a USB key.  Temporarily connect to the Internet long enough to install the prerequisites listed above, then switch to airplane mode and use CoboUUID.py to verify the UUID.
 
-To audit the source code that Cobo Vault uses, refer to the [Cobo Github repository](https://github.com/CoboVault/cobo-vault-cold/blob/master/app/src/main/java/com/cobo/cold/callables/GetUuidCallable.java#L30)
+Finally, one can audit the source code that Cobo Vault uses, refer to the [Cobo Github repository](https://github.com/CoboVault/cobo-vault-cold/blob/master/app/src/main/java/com/cobo/cold/callables/GetUuidCallable.java#L30).  This isn't a substitute for doing a verification on one's own, but it does provide extra insight and comfort, and the fact that Cobo provides source code is highly appreciated and something that only some wallets do (Trezor mostly does, Ledger doesn't).
