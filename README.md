@@ -45,19 +45,16 @@ data {
       active: true
       accounts {
         hdPath: "M/49\'/0\'/0\'"
-        xPub: "xpub6C6nQwHaWbSrzs5tZ1q7m5R9cPK9eYpNMFesiXsYrgc1P8bvLLAet9JfHjYXKjToD8cBRsw
-JXXbbFpXgwsswVPAZzKMa1jUp2kVkGVUaJa7"
+        xPub: "xpub6C6nQwHaWbSrzs5tZ1q7m5R9cPK9eYpNMFesiXsYrgc1P8bvLLAet9JfHjYXKjToD8cBRswJXXbbFpXgwsswVPAZzKMa1jUp2kVkGVUaJa7"
         addressLength: 1
       }
-    }```
+    }
 ...
-```
     coins {
       coinCode: "CFX"
       accounts {
         hdPath: "M/44\'/503\'/0\'"
-        xPub: "xpub6BtifpKfg5jVAoq27YcCUxExKSsbDMnGgFBBHZVBSL5VRYG4JLXjq9KyJc1Tb8mLnhpwgED
-sMFdMtWD5M3b16wiJcXCD51ooomndAWQmYqs"
+        xPub: "xpub6BtifpKfg5jVAoq27YcCUxExKSsbDMnGgFBBHZVBSL5VRYG4JLXjq9KyJc1Tb8mLnhpwgEDsMFdMtWD5M3b16wiJcXCD51ooomndAWQmYqs"
         addressLength: 1
       }
     }
@@ -65,9 +62,7 @@ sMFdMtWD5M3b16wiJcXCD51ooomndAWQmYqs"
 }
 coldVersion: 20400
 deviceType: "Cobo Vault Pro"
-
 *************************************************************
-
 At this point one should verify each of the XPUBs shown above, and
 the UUID shown below (also at the top of the above output). See the
 README.md for how to do that.
