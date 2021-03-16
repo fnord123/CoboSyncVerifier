@@ -17,7 +17,10 @@ To run this the following pre-requisites must be fulfilled.
 2) Google Python API client for protobufs. Assuming python3, this can be installed by doing:<br>
 `pip3 install --upgrade google-api-python-client`
 
-3) Run (and install if necessary) `make` to build the python modules needed for Google proto3 support.
+3) pip install bip_utils for verify the uuid 
+`pip3 install bip-utils==1.7.0`
+
+4) Run (and install if necessary) `make` to build the python modules needed for Google proto3 support.
 
 Once the above pre-requisites are met, the following sequence can be used to verify the safety of the contents of the QR Codes the Cobo Vault shows to the Cobo App during pairing.
 1) Turn on the Cobo Vault, click on the menu hamburger in the top-left ocrner, and select *Watch-only Wallet*
@@ -73,6 +76,25 @@ documented by Cobo, along with a way to validate it.
 UUID is a072a758ff78d50b27db92533dd0a3dcbfa92f2825b5a2d65d27e0659c8389ef
 ```
 
-As one can see, most of the payload is understandable and does not appear to contain any secrets.  However, the UUID is suspicious in that it is not in UUID format (too many bytes!) and is long enough that it could contain one's secret key.
+As one can see, most of the payload is understandable and does not appear to contain any secrets.  
 
-As of today that is where things stand.  I've looked at the [Cobo source code](https://github.com/CoboVault/cobo-vault-cold/) but have not been successful in reverse engineering an independent implementation of decoding the UUID to prove it is safe and not leaking secrets.  Note that [someone else did something similar](https://github.com/CoboVault/cobo-vault-cold/issues/14) and claims that they successfully verified the UUID was safe, but I wasn't able to follow their directions.
+The UUID stands for the the unique identifier. it is the one of your public key of your seed. and its hd path is "M/44'/1131373167'/0'". and you can check the CoboUUID.py file to get more detail.
+
+To verify the uuid, there are one thing I would like to highlight.
+
+***This script is for logic and data verification, you should use the testing mnemonic to do the verification!***
+
+1.Replace the MNEMONIC string by the one you generated from the above steps in the CoboUUID.py file.
+
+```python
+if __name__ == "__main__":
+    # replace this to your mnemonic to be verified
+    MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+    uuid = generate_uuid(MNEMONIC)
+    print('UUID is', uuid)
+```
+
+2.Run python CoboUUID.py
+the uuid printed should be same as the above one which is in the QR Codes.
+
+For more detail about how Cobo Vault generates the UUID, please refer this file: https://github.com/CoboVault/cobo-vault-cold/blob/master/app/src/main/java/com/cobo/cold/callables/GetUuidCallable.java#L30
