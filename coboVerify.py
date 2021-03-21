@@ -117,8 +117,8 @@ print(message)
 print("*************************************************************")
 print("")
 # The uuid is the only part that is worrisome.
-print("Most of the above looks safe, but the UUID could potentially")
-print("carry our secret key.  The exact format of it needs to be")
-print("documented by Cobo, along with a way to validate it.")
+print("At this point one should verify each of the XPUBs shown above, and")
+print("the UUID shown below (also at the top of the above output). See the")
+print("README.md for how to do that.")
 uuid = message.data.uuid
 print("UUID is " + uuid)
